@@ -2,6 +2,7 @@ import {
   Controller as MuseumController,
   Repository as MuseumRepository,
 } from "./museums/index.ts";
+import { createServer } from "./web/index.ts";
 
 const museumRepository = new MuseumRepository();
 const museumController = new MuseumController({ museumRepository });
@@ -18,3 +19,10 @@ museumRepository.storage.set("1fbdd2a9-1b97-46e0-b450-62819e5772ff", {
 });
 
 console.log(await museumController.getAll());
+
+createServer({
+  configurations: {
+    port: 8000,
+  },
+	museum: museumController,
+});

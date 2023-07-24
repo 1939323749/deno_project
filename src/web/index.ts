@@ -1,24 +1,45 @@
-import {serve}from "https://deno.land/std@0.195.0/http/server.ts";
+import type { MuseumController } from "./index.ts";
 
-const PORT=8000;
-const server =Deno.listen({port:PORT});
-console.log(`Server running on port ${PORT}`);
+async function serveHttp(conn: Deno.Conn, museum: any) {
+    const httpConn = Deno.serveHttp(conn);
+    for await (const requestEvent of httpConn) {
+      if (
+        requestEvent.request.url.endsWith("/api/museums") &&
+        requestEvent.request.method === "GET"
+      ) {
+        requestEvent.respondWith(
+          new Response(JSON.stringify({museums:await museum.getAll()}), {
+            status: 200,
+            headers: {
+              "content-type": "application/json",
+            },
+          }),
+        );
+      } else {
+        requestEvent.respondWith(
+          new Response("Not Found", {
+            status: 404,
+            headers: {
+              "content-type": "text/plain",
+            },
+          }),
+        );
+      }
+    }
+  }
 
-for await(const conn of server){
-    serveHttp(conn);
+export async function createServer({ configurations: { port }, museum }: CreateServerDependencies) {
+  const server = Deno.listen({ port });
+  console.log(`Server running on port ${port}`);
+
+  for await (const conn of server) {
+    serveHttp(conn,museum);
+  }
 }
 
-async function serveHttp(conn:Deno.Conn){
-    const httpConn=Deno.serveHttp(conn);
-    for await(const requestEvent of httpConn){
-        const body=`musuem-api`;
-        requestEvent.respondWith(
-            new Response(body,{
-                status:200,
-                headers:{
-                    "content-type":"text/plain",
-                },
-            }),
-        );
-    }
+interface CreateServerDependencies {
+  configurations: {
+    port: number;
+  },
+  museum: MuseumController;
 }

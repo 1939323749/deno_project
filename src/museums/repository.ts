@@ -1,9 +1,9 @@
-import { Museum,MuseumRepository } from "./index.ts";
+import { Museum, MuseumRepository } from "./index.ts";
 
 export class Repository implements MuseumRepository {
-	storage=new Map<string,Museum>();
+  storage = new Map<string, Museum>();
 
-	async getAll() {
-		return [...this.storage.values()];
-	}
+  async getAll() {
+    return [...this.storage.values()];
+  }
 }
