@@ -1,11 +1,13 @@
 import type { UserRepository } from "./types.ts"
 import { UserToUserDto } from "./adapter.ts";
+import type { UserController } from "./types.ts";
+import { generateSalt, hashWithSalt } from "./util.ts";
 type RegisterPayload={username:string,password:string}
 
 interface ControllerDependencies {
     userRepository:UserRepository
 }
-export class Controller {
+export class Controller implements UserController{
     userRepository:UserRepository;
     constructor({userRepository}:ControllerDependencies){
         this.userRepository=userRepository;
@@ -14,11 +16,20 @@ export class Controller {
         if (await this.userRepository.exists(payload.username)) {
             throw new Error("User already exists");
         }
-        const createdUser = await this.userRepository.create({
-            username: payload.username,
-            hash: "random",
-            salt: "random",
-        });
+        const createdUser = await this.userRepository.create(
+            await this.getHashedUser(payload.username,payload.password)
+        );
         return UserToUserDto(createdUser);
     }
+    public async getHashedUser(username: string,password:string) {
+        const salt=generateSalt();
+        const user= {
+            username,
+            hash:await hashWithSalt(password,salt),
+            salt,
+            created_at:new Date()
+        }
+        return user;
+    }
+
 }

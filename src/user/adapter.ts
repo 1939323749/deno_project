@@ -1,4 +1,5 @@
-import type { User,UserDto } from "./index.ts";
+import type { User } from "./index.ts";
+import type { UserDto } from "./types.ts";
 
 export const UserToUserDto=(user:User):UserDto=>{
     return {
