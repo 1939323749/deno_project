@@ -14,5 +14,13 @@ export class Repository implements UserRepository {
         return Boolean(user);
     }
 
+    async getByUsername(_username: string): Promise<User> {
+        const user= await this.storage.get(_username);
+        if(!user){
+            throw new Error("User not found");
+        }
+        return user;
+    }
+
     private storage=new Map<User["username"],User>();
 }
