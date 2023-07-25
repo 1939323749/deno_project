@@ -1,4 +1,6 @@
 import type { MuseumController } from "./index.ts";
+import { serve } from "../deps.ts";
+import { Application } from "../deps.ts";
 
 async function serveHttp(conn: Deno.Conn, museum: any) {
     const httpConn = Deno.serveHttp(conn);
@@ -29,12 +31,12 @@ async function serveHttp(conn: Deno.Conn, museum: any) {
   }
 
 export async function createServer({ configurations: { port }, museum }: CreateServerDependencies) {
-  const server = Deno.listen({ port });
-  console.log(`Server running on port ${port}`);
-
-  for await (const conn of server) {
-    serveHttp(conn,museum);
-  }
+  const app= new Application();
+  app.use(async (ctx, next) => {
+    ctx.response.body = "Hello World!";
+    await next();
+  });
+  await app.listen({ port });
 }
 
 interface CreateServerDependencies {
