@@ -1,4 +1,4 @@
-import type { CreateUser, User, UserRepository as userRepository, TokenRepository as tokenRepository} from "./types.ts";
+import type { CreateUser, User, UserRepository as userRepository, TokenRepository as tokenRepository} from "../types.ts";
 
 export class UserRepository implements userRepository {
   async create(user: CreateUser): Promise<User> {
