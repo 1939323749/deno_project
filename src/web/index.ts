@@ -1,43 +1,34 @@
-import type { MuseumController } from "./index.ts";
-import { serve } from "../deps.ts";
-import { Application } from "../deps.ts";
+import type { MuseumController } from "../museums/index.ts";
+import { Application,Router } from "../deps.ts";
 
-async function serveHttp(conn: Deno.Conn, museum: any) {
-    const httpConn = Deno.serveHttp(conn);
-    for await (const requestEvent of httpConn) {
-      if (
-        requestEvent.request.url.endsWith("/api/museums") &&
-        requestEvent.request.method === "GET"
-      ) {
-        requestEvent.respondWith(
-          new Response(JSON.stringify({museums:await museum.getAll()}), {
-            status: 200,
-            headers: {
-              "content-type": "application/json",
-            },
-          }),
-        );
-      } else {
-        requestEvent.respondWith(
-          new Response("Not Found", {
-            status: 404,
-            headers: {
-              "content-type": "text/plain",
-            },
-          }),
-        );
-      }
-    }
-  }
+interface CreateServerDependencies {
+  configurations: {
+    port: number;
+  },
+  museum: MuseumController;
+}
 
 export async function createServer({ configurations: { port }, museum }: CreateServerDependencies) {
-  const app= new Application();
+  const app = new Application();
+  app.addEventListener("listen", (e) => {
+    console.log(`Listening on: http://${e.hostname}:${port}`);
+  });
+  app.addEventListener("error", (e) => {
+    console.log("Error: ", e.error);
+  });
+  const appRouter = new Router();
+  appRouter.get("/api/museums", async (ctx) => {
+    ctx.response.body = { museums: await museum.getAll() };
+  });
+  app.use(appRouter.routes());
+  app.use(appRouter.allowedMethods());
   app.use(async (ctx, next) => {
     ctx.response.body = "Hello World!";
     await next();
   });
   await app.listen({ port });
 }
+
 
 interface CreateServerDependencies {
   configurations: {
