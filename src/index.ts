@@ -18,12 +18,11 @@ const museumController = new MuseumController({ museumRepository });
 const client = new MongoClient();
 await client.connect("mongodb://localhost:27017");
 const db = client.database("test");
-const userRepository=new Repository({storage:db})
+const userRepository = new Repository({ storage: db });
 const userController = new UserController({ userRepository });
 
 const tokenRepository = new TokenRepository();
 const tokenController = new TokenController({ tokenRepository });
-
 
 museumRepository.storage.set("1fbdd2a9-1b97-46e0-b450-62819e5772ff", {
   id: "1fbdd2a9-1b97-46e0-b450-62819e5772ff",
@@ -43,4 +42,5 @@ createServer({
   museum: museumController,
   user: userController,
   token: tokenController,
+  allowedOrigins: ["http://localhost:3000"],
 });

@@ -1,5 +1,5 @@
 import type { MuseumController } from "../museums/index.ts";
-import { Application, Router, RouterMiddleware } from "../deps.ts";
+import { Application, Router, RouterMiddleware, oakCors } from "../deps.ts";
 import { UserController, TokenController } from "../user/index.ts";
 
 interface CreateServerDependencies {
@@ -9,6 +9,7 @@ interface CreateServerDependencies {
   museum: MuseumController;
   user: UserController;
   token: TokenController;
+  allowedOrigins: string[];
 }
 
 export async function createServer({
@@ -16,8 +17,10 @@ export async function createServer({
   museum,
   user,
   token,
+  allowedOrigins,
 }: CreateServerDependencies) {
   const app = new Application();
+  app.use(oakCors({ origin: allowedOrigins }));
   app.use(async (ctx, next) => {
     const start = Date.now();
     await next();
