@@ -1,8 +1,6 @@
-import type { UserRepository } from "./types.ts"
+import type { UserRepository,RegisterPayload,UserController } from "./types.ts"
 import { UserToUserDto } from "./adapter.ts";
-import type { UserController } from "./types.ts";
 import { generateSalt, hashWithSalt } from "./util.ts";
-type RegisterPayload={username:string,password:string}
 
 interface ControllerDependencies {
     userRepository:UserRepository
