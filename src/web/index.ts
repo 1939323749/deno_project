@@ -1,6 +1,10 @@
 import type { MuseumController } from "../museums/index.ts";
-import { Application, Router,RouterMiddleware } from "../deps.ts";
-import { UserController } from "../user/index.ts";
+import {
+  Application,
+  Router,
+  RouterMiddleware,
+} from "../deps.ts";
+import { UserController,getUUID } from "../user/index.ts";
 
 interface CreateServerDependencies {
   configurations: {
@@ -34,18 +38,28 @@ export async function createServer({
     console.log("Request was made to /api");
     await next();
   });
-  const authMiddleware: RouterMiddleware<"/">= async (ctx, next) => {
+  const authMiddleware: RouterMiddleware<"/"> = async (ctx, next) => {
     const authHeader = ctx.request.headers.get("Authorization");
     if (!authHeader) {
       ctx.response.status = 401;
       ctx.response.body = "Authorization header required";
       return;
     }
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      ctx.response.status = 401;
+      ctx.response.body = "Token required";
+      return;
+    }
     await next();
   };
-  appRouter.get("/museums",authMiddleware, async (ctx) => {
-    ctx.response.body = { museums: await museum.getAll() };
-  });
+  appRouter.get(
+    "/museums",
+    authMiddleware,
+    async (ctx) => {
+      ctx.response.body = { museums: await museum.getAll() };
+    }
+  );
   appRouter.post("/users/register", async (ctx) => {
     const { username, password } = await ctx.request.body().value;
     if (!username || !password) {
@@ -63,19 +77,20 @@ export async function createServer({
     }
   });
   appRouter.post("/users/login", async (ctx) => {
-    const {username,password}=await ctx.request.body().value;
-    if(!username||!password){
-      ctx.response.status=400;
-      ctx.response.body="Username and password are required";
+    const { username, password } = await ctx.request.body().value;
+    if (!username || !password) {
+      ctx.response.status = 400;
+      ctx.response.body = "Username and password are required";
       return;
     }
-    try{
-      const userDto=await user.login({username,password});
-      ctx.response.status=201;
-      ctx.response.body={user:userDto};
-    }catch(e){
-      ctx.response.status=400;
-      ctx.response.body={message:e.message};
+    try {
+      const userDto = await user.login({ username, password });
+      ctx.response.headers.set("toke: ", getUUID());
+      ctx.response.status = 201;
+      ctx.response.body = { user: userDto};
+    } catch (e) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: e.message };
     }
   });
   app.use(appRouter.routes());

@@ -39,8 +39,8 @@ export class Controller implements UserController {
       const user = await this.userRepository.getByUsername(payload.username);
 
       await this.comparePassword(payload.password, user);
-      
-      return UserToUserDto(user)
+
+      return UserToUserDto(user);
     } catch (e) {
       console.log(e);
       throw new Error("Username and password combination is not correct");
