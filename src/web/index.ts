@@ -62,6 +62,22 @@ export async function createServer({
       ctx.response.body = { message: e.message };
     }
   });
+  appRouter.post("/users/login", async (ctx) => {
+    const {username,password}=await ctx.request.body().value;
+    if(!username||!password){
+      ctx.response.status=400;
+      ctx.response.body="Username and password are required";
+      return;
+    }
+    try{
+      const userDto=await user.login({username,password});
+      ctx.response.status=201;
+      ctx.response.body={user:userDto};
+    }catch(e){
+      ctx.response.status=400;
+      ctx.response.body={message:e.message};
+    }
+  });
   app.use(appRouter.routes());
   app.use(appRouter.allowedMethods());
   app.use(async (ctx, next) => {
