@@ -26,7 +26,7 @@ export class Controller implements UserController{
             hash:await hashWithSalt(password,salt),
             salt,
             created_at:new Date()
-        }
+        };
         return user;
     }
 

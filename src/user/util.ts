@@ -4,7 +4,6 @@ import {crypto}from "https://deno.land/std@0.195.0/crypto/mod.ts"
 export const hashWithSalt=(password:string,salt:string)=>{
     const messageBuffer = new TextEncoder().encode(password+salt);
     const hashBuffer = crypto.subtle.digest("SHA-256", messageBuffer);
-    console.log(hashBuffer);
     return hashBuffer.then(toHashString);
 }
 
