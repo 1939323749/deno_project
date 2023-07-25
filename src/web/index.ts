@@ -1,10 +1,6 @@
 import type { MuseumController } from "../museums/index.ts";
-import {
-  Application,
-  Router,
-  RouterMiddleware,
-} from "../deps.ts";
-import { UserController,getUUID } from "../user/index.ts";
+import { Application, Router, RouterMiddleware } from "../deps.ts";
+import { UserController, TokenController } from "../user/index.ts";
 
 interface CreateServerDependencies {
   configurations: {
@@ -12,12 +8,14 @@ interface CreateServerDependencies {
   };
   museum: MuseumController;
   user: UserController;
+  token: TokenController;
 }
 
 export async function createServer({
   configurations: { port },
   museum,
   user,
+  token,
 }: CreateServerDependencies) {
   const app = new Application();
   app.use(async (ctx, next) => {
@@ -39,27 +37,35 @@ export async function createServer({
     await next();
   });
   const authMiddleware: RouterMiddleware<"/"> = async (ctx, next) => {
-    const authHeader = ctx.request.headers.get("Authorization");
+    const authHeader = ctx.request.headers.get("token");
     if (!authHeader) {
       ctx.response.status = 401;
       ctx.response.body = "Authorization header required";
       return;
     }
-    const token = authHeader.split(" ")[1];
+    const user_token = authHeader;
     if (!token) {
       ctx.response.status = 401;
       ctx.response.body = "Token required";
       return;
     }
+    try {
+      const username = await token.verify(user_token);
+      if (!username) {
+        ctx.response.status = 401;
+        ctx.response.body = "Invalid token";
+        return;
+      }
+    } catch (e) {
+      ctx.response.status = 401;
+      ctx.response.body = e.message;
+      return;
+    }
     await next();
   };
-  appRouter.get(
-    "/museums",
-    authMiddleware,
-    async (ctx) => {
-      ctx.response.body = { museums: await museum.getAll() };
-    }
-  );
+  appRouter.get("/museums", authMiddleware, async (ctx) => {
+    ctx.response.body = { museums: await museum.getAll() };
+  });
   appRouter.post("/users/register", async (ctx) => {
     const { username, password } = await ctx.request.body().value;
     if (!username || !password) {
@@ -85,9 +91,9 @@ export async function createServer({
     }
     try {
       const userDto = await user.login({ username, password });
-      ctx.response.headers.set("toke: ", getUUID());
+      ctx.response.headers.set("token", await token.create(username));
       ctx.response.status = 201;
-      ctx.response.body = { user: userDto};
+      ctx.response.body = { user: userDto };
     } catch (e) {
       ctx.response.status = 400;
       ctx.response.body = { message: e.message };

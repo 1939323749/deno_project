@@ -1,6 +1,6 @@
-import type { CreateUser, User, UserRepository } from "./types.ts";
+import type { CreateUser, User, UserRepository as userRepository, TokenRepository as tokenRepository} from "./types.ts";
 
-export class Repository implements UserRepository {
+export class UserRepository implements userRepository {
   async create(user: CreateUser): Promise<User> {
     const userWithCreatedAt = {
       ...user,
@@ -24,4 +24,29 @@ export class Repository implements UserRepository {
   }
 
   private storage = new Map<User["username"], User>();
+}
+
+export class TokenRepository implements tokenRepository {
+  async create(token: string, username: string): Promise<void> {
+    await this.storage.set(token, username);
+  }
+
+  async exists(token: string): Promise<boolean> {
+    const user = await this.storage.get(token);
+    return Boolean(user);
+  }
+
+  async getByToken(token: string): Promise<string> {
+    const user = await this.storage.get(token);
+    if (!user) {
+      throw new Error("Token not found");
+    }
+    return user;
+  }
+
+  async delete(token: string): Promise<void> {
+    await this.storage.delete(token);
+  }
+
+  private storage = new Map<string, string>();
 }

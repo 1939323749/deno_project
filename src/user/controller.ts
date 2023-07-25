@@ -5,12 +5,13 @@ import type {
   User,
 } from "./types.ts";
 import { UserToUserDto } from "./adapter.ts";
-import { generateSalt, hashWithSalt } from "./util.ts";
+import { generateSalt, getUUID, hashWithSalt } from "./util.ts";
+import { TokenRepository, TokenController } from "./index.ts";
 
 interface ControllerDependencies {
   userRepository: UserRepository;
 }
-export class Controller implements UserController {
+export class userController implements UserController {
   userRepository: UserRepository;
   constructor({ userRepository }: ControllerDependencies) {
     this.userRepository = userRepository;
@@ -52,5 +53,32 @@ export class Controller implements UserController {
       return Promise.resolve(true);
     }
     return Promise.reject(false);
+  }
+}
+
+interface TokenControllerDependencies {
+  tokenRepository: TokenRepository;
+}
+
+export class tokenController implements TokenController {
+  tokenRepository: TokenRepository;
+  constructor({ tokenRepository }: TokenControllerDependencies) {
+    this.tokenRepository = tokenRepository;
+  }
+  public async create(username: string) {
+    const token = getUUID();
+    await this.tokenRepository.create(token, username);
+    return token;
+  }
+  public async verify(token: string) {
+    try {
+      const user = await this.tokenRepository.getByToken(token);
+			return user;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+  public async delete(token: string) {
+    await this.tokenRepository.delete(token);
   }
 }
