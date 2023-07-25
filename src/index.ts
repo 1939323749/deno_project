@@ -2,12 +2,12 @@ import {
   Controller as MuseumController,
   Repository as MuseumRepository,
 } from "./museums/index.ts";
-import { tokenController as TokenController } from "./user/controller.ts";
 import {
   UserController,
   UserRepository,
+  TokenController,
+  TokenRepository,
 } from "./user/index.ts";
-import { TokenRepository } from "./user/repository.ts";
 import { createServer } from "./web/index.ts";
 
 const museumRepository = new MuseumRepository();
