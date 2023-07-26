@@ -10,6 +10,6 @@ export class Controller implements MuseumController {
     this.museumRepository = museumRepository;
   }
   async getAll() {
-    return this.museumRepository.getAll(); //Code to an interface, not an implementation.
+    return await this.museumRepository.getAll(); //Code to an interface, not an implementation.
   }
 }

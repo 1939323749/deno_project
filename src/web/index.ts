@@ -108,12 +108,12 @@ export async function createServer({
     ctx.response.body = "Hello World!";
     await next();
   });
-  await app.listen({ port });
+
+  const controller = await new AbortController();
+  const { signal } = controller;
+
+  app.listen({ port, signal });
+
+  return {app,controller}
 }
 
-interface CreateServerDependencies {
-  configurations: {
-    port: number;
-  };
-  museum: MuseumController;
-}

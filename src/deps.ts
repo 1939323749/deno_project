@@ -7,3 +7,4 @@ export {
 } from "https://deno.land/x/mongo@v0.31.2/mod.ts";
 export type { RouterMiddleware } from "https://deno.land/x/oak@v12.6.0/mod.ts";
 export { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
+export * as t from "https://deno.land/std@0.195.0/testing/asserts.ts";
