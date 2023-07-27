@@ -171,7 +171,7 @@ Deno.test("Get all museums with token", async () => {
   const get_all_museums = await fetch("http://localhost:8001/api/museums", {
     headers: {
       "Content-Type": "application/json",
-      "token": token??"",
+      token: token ?? "",
     },
   });
   const all_museums = await get_all_museums.text();

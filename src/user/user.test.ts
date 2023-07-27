@@ -58,6 +58,8 @@ Deno.test("it is able to get user by username", async () => {
   const username = "user 1";
   const password = "password 1";
 
+  repository.create(await user.getHashedUser(username, password));
+
   const getUser = await user.userRepository.getByUsername(username);
 
   t.assertEquals(getUser.username, username, "has the correct username");

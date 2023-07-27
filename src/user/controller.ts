@@ -73,7 +73,7 @@ export class tokenController implements TokenController {
   public async verify(token: string) {
     try {
       const user = await this.tokenRepository.getByToken(token);
-			return user;
+      return user;
     } catch (e) {
       throw new Error(e);
     }
