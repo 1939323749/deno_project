@@ -1,9 +1,19 @@
 import { createServer } from "./web/index.ts";
-import {Controller as MuseumController,Repository as MuseumRepository } from "./museums/index.ts";
-import { UserController, UserRepository, TokenController, TokenRepository } from "./user/index.ts";
+import {
+  Controller as MuseumController,
+  Repository as MuseumRepository,
+} from "./museums/index.ts";
+import {
+  UserController,
+  UserRepository,
+  TokenController,
+  TokenRepository,
+} from "./user/index.ts";
 import { t } from "./deps.ts";
 
-Deno.test("it should let users with a valid token access the museums list", async () => {
+Deno.test(
+  "it should let users with a valid token access the museums list",
+  async () => {
     const userRepository = new UserRepository();
     const userController = new UserController({ userRepository });
     const tokenRepository = new TokenRepository();
@@ -29,7 +39,7 @@ Deno.test("it should let users with a valid token access the museums list", asyn
       token: tokenController,
       allowedOrigins: ["http://localhost:3000"],
     });
-  
+
     const register = await fetch("http://localhost:8001/api/users/register", {
       method: "POST",
       headers: {
@@ -59,11 +69,16 @@ Deno.test("it should let users with a valid token access the museums list", asyn
     const get_all_museums = await fetch("http://localhost:8001/api/museums", {
       headers: {
         "Content-Type": "application/json",
-        "token": token??"",
+        token: token ?? "",
       },
     });
     const all_museums = await get_all_museums.text();
-    t.assertStringIncludes(all_museums, "The Louvre", "get all museums success");
-    
+    t.assertStringIncludes(
+      all_museums,
+      "The Louvre",
+      "get all museums success"
+    );
+
     server.controller.abort();
-  });
+  }
+);

@@ -11,4 +11,3 @@ Deno.bench("run hashWithSalt 1000 times", async () => {
     await hashWithSalt("password", generateSalt());
   }
 });
-
